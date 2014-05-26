@@ -1,0 +1,146 @@
+<html>
+<head>
+    <style>
+        @import "tools.css";
+    </style>
+    <script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleInfoButton.js' charset='utf-8'/>
+    <script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleAnimator.js' charset='utf-8'/>
+    <script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleButton.js' charset='utf-8'/>
+    <script type='text/javascript'>
+        var gDoneButton,
+                gInfoButton,
+        //noinspection SpellCheckingInspection
+                keys = "abcdefghijklmnopqrstuvwxyz",
+                symbols = "~`!@#$%^&*()_-+={[}]|\\:;\"'<,>.?/",
+                capitals = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+                numbers = "0123456789",
+                updateOutput = function (id, result) {
+                    document.getElementById(id).value = result
+                },
+                generate = function () {
+                    var temp = '',
+                            i,
+                            tempKeys,
+                            length,
+                            savedLength,
+                            savedNumbers,
+                            savedCapitals,
+                            savedSymbols;
+                    if (window.widget) {
+                        savedLength = widget.preferenceForKey("savedLength");
+                        savedNumbers = widget.preferenceForKey("savedNumbers");
+                        savedCapitals = widget.preferenceForKey("savedCapitals");
+                        savedSymbols = widget.preferenceForKey("savedSymbols");
+                    }
+
+                    tempKeys = keys;
+
+                    if (savedLength > 0) {
+                        length = savedLength;
+                    }
+                    else {
+                        length = 8;
+                    }
+
+                    if (savedCapitals === true) {
+                        tempKeys = tempKeys.concat(capitals);
+                    }
+
+                    if (savedNumbers === true) {
+                        tempKeys = tempKeys.concat(numbers);
+                    }
+                    if (savedSymbols === true) {
+                        tempKeys = tempKeys.concat(symbols);
+                    }
+
+                    for (i = 0; i < length; i++) {
+                        temp += tempKeys.charAt(Math.floor(Math.random() * tempKeys.length))
+                    }
+
+                    return updateOutput(passwordOutput, temp);
+                },
+                setup = function () {
+                    gDoneButton = new AppleGlassButton(document.getElementById("doneButton"), "Done", hidePrefs);
+                    gInfoButton = new AppleInfoButton(document.getElementById("infoButton"), document.getElementById("front"), "white", "white", showPrefs);
+                },
+                showPrefs = function () {
+                    var front = document.getElementById("front");
+                    var back = document.getElementById("back");
+
+                    if (window.widget) {
+                        widget.prepareForTransition("ToBack");
+                    }
+
+                    front.style.display = "none";
+                    back.style.display = "block";
+
+                    if (window.widget) {
+                        setTimeout('widget.performTransition();', 0);
+                    }
+                },
+                hidePrefs = function () {
+                    var front = document.getElementById("front");
+                    var back = document.getElementById("back");
+
+                    if (window.widget) {
+                        widget.prepareForTransition("ToFront");
+                    }
+
+                    back.style.display = "none";
+                    front.style.display = "block";
+
+                    if (window.widget) {
+                        setTimeout('widget.performTransition();', 0);
+                    }
+                },
+                save = function (key, value) {
+                    if (window.widget) {
+                        widget.setPreferenceForKey(value, key);
+                    }
+                };
+    </script>
+</head>
+<body onload="setup();" bgcolor=#444444>
+<div id="front">
+    <span class="tools">
+        <form name="passwordGenerator">
+            <input type="text" size=18 id="passwordOutput" name="passwordOutput" title="Password">
+            <input type="button" value="Generate Password" onClick="generate();">
+            <hr/>
+            <textarea rows="5" id="dEncodedText" name="dEncodedText" title="dEncodedText"></textarea>
+            <br/>
+            <input type="button" class="left" value="Base64 Encode" onClick="document.getElementById('dEncodedText').value=btoa(document.getElementById('dEncodedText').value);">
+            <input type="button" class="right" value="Base64 Decode" onClick="document.getElementById('dEncodedText').value=atob(document.getElementById('dEncodedText').value);">
+            <br/>
+            <br/>
+            <input type="button" class="left" value="Url Encode" onClick="document.getElementById('dEncodedText').value=encodeURIComponent(document.getElementById('dEncodedText').value);">
+            <input type="button" class="right" value="Url Decode" onClick="document.getElementById('dEncodedText').value=decodeURIComponent(document.getElementById('dEncodedText').value);">
+
+
+        </form>
+    </span>
+
+    <div id='infoButton'></div>
+</div>
+<div id="back">
+    <form name="preferences">
+        Password Generation:
+        <label for="length">Length:</label>
+        <input type="text" id="length" name="length" size=3 value="8" title="Password Length" onchange="save('savedLength',this.value);">
+        <br/>
+        <label for="numbers">Use numbers:</label>
+        <input type="checkbox" id="numbers" name="numbers" title="Numbers" onclick="save('savedNumbers',this.checked);">
+        <br/>
+        <label for="capitals">Use capitals:</label>
+        <input type="checkbox" id="capitals" name="capitals" title="Capitals" onclick="save('savedCapitals',this.checked);">
+        <br/>
+        <label for="symbols">Use symbols:</label>
+        <input type="checkbox" id="symbols" name="symbols" title="Symbols" onclick="save('savedSymbols',this.checked);">
+        <br/>
+        <hr/>
+
+    </form>
+    <div id="doneButton"></div>
+</div>
+</body>
+</html>

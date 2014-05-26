@@ -1,0 +1,41 @@
+label {
+    color: white;
+    width: 200px;
+    display: block;
+    float: left;
+    font-weight: bold;
+}
+
+textarea {
+    width: 100%;
+}
+
+#front {
+    display: block;
+}
+
+#back {
+    display: none;
+}
+
+.right {
+    display: block;
+    float: right;
+}
+
+.left {
+    display: block;
+    float: left;
+}
+
+/*#infoButton {*/
+/*position: absolute;*/
+/*bottom: 12px;*/
+/*right: 40px;*/
+/*}*/
+
+/*#doneButton {*/
+/*position: absolute;*/
+/*bottom: 20px;*/
+/*left: 82px;*/
+/*}*/
