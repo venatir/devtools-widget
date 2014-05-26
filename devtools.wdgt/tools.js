@@ -453,7 +453,7 @@ var gDoneButton,
         },
         getNiceTimestampConversion: function (input) {
             var epoch,
-                result = "",
+                result,
                 timestampType;
             if (input.charAt(input.length - 1) == "L") {
                 input = input.slice(0, -1);
@@ -497,13 +497,13 @@ var gDoneButton,
                 result = "Cannot parse date";
             } else {
                 localTime = date.getFullYear() + "-" +
-                ("0" + date.getMonth() + 1).slice(-2) + "-" +
+                ("0" + (date.getMonth() + 1)).slice(-2) + "-" +
                 ("0" + date.getDate()).slice(-2) + " " +
                 ("0" + date.getHours()).slice(-2) + ":" +
                 ("0" + date.getMinutes()).slice(-2) + ":" +
                 ("0" + date.getSeconds()).slice(-2) + " GMT" + ((-date.getTimezoneOffset() > 0) ? "+" : "-") + (-date.getTimezoneOffset() / 60).toString();
                 gmtTime = date.getUTCFullYear() + "-" +
-                ("0" + date.getUTCMonth() + 1).slice(-2) + "-" +
+                ("0" + (date.getUTCMonth() + 1)).slice(-2) + "-" +
                 ("0" + date.getUTCDate()).slice(-2) + " " +
                 ("0" + date.getUTCHours()).slice(-2) + ":" +
                 ("0" + date.getUTCMinutes()).slice(-2) + ":" +
