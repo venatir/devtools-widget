@@ -1,11 +1,11 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleDisplayName</key>
-    <string>Venatir's Developer Tools</string>
+    <string>Venatir\'s Developer Tools</string>
     <key>CFBundleIdentifier</key>
     <string>com.venatir.widget.development.tools</string>
     <key>CFBundleName</key>
-    <string>Venatir's Developer Tools</string>
+    <string>Venatir\'s Developer Tools</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0</string>
     <key>CFBundleVersion</key>

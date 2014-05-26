@@ -16,22 +16,25 @@ var gDoneButton,
 
             front.style.display = "none";
             back.style.display = "block";
-
+            pasteBin.populateTimeframes("pasteBin-timeFrameB");
+            pasteBin.populateProgrammingLanguages("pasteBin-programmingLanguageB");
             if (window.widget) {
                 setTimeout('widget.performTransition();', 0);
             }
         },
         hidePrefs: function () {
-            var front = document.getElementById("front");
-            var back = document.getElementById("back");
 
+            var front = document.getElementById("front");
+
+            var back = document.getElementById("back");
             if (window.widget) {
                 widget.prepareForTransition("ToFront");
             }
 
             back.style.display = "none";
             front.style.display = "block";
-
+            pasteBin.populateTimeframes("pasteBin-timeFrame");
+            pasteBin.populateProgrammingLanguages("pasteBin-programmingLanguage");
             if (window.widget) {
                 setTimeout('widget.performTransition();', 0);
             }
@@ -40,6 +43,13 @@ var gDoneButton,
             if (window.widget) {
                 widget.setPreferenceForKey(value, key);
             }
+        },
+        load: function (key) {
+            var value;
+            if (window.widget) {
+                value = widget.preferenceForKey(key);
+            }
+            return value;
         }
     },
     password = {
@@ -52,16 +62,10 @@ var gDoneButton,
                 i,
                 tempKeys,
                 length,
-                savedLength,
-                savedNumbers,
-                savedCapitals,
-                savedSymbols;
-            if (window.widget) {
-                savedLength = widget.preferenceForKey("savedLength");
-                savedNumbers = widget.preferenceForKey("savedNumbers");
-                savedCapitals = widget.preferenceForKey("savedCapitals");
-                savedSymbols = widget.preferenceForKey("savedSymbols");
-            }
+                savedLength = apple.load("savedLength"),
+                savedNumbers = apple.load("savedNumbers"),
+                savedCapitals = apple.load("savedCapitals"),
+                savedSymbols = apple.load("savedSymbols");
 
             tempKeys = this.keys;
 
@@ -125,6 +129,55 @@ var gDoneButton,
                 "api_paste_format=" + api_paste_format + "&" +
                 "api_user_key=" + api_user_key
             )
+        },
+        populateTimeframes: function (id) {
+            var i,
+                data,
+                option,
+                savedTimeframe;
+            document.getElementById(id).options.lenght = 0;
+            for (i = 0; i < pasteBin.timeFrames.length; i++) {
+                data = pasteBin.timeFrames[i];
+                option = new Option(data.text, data.value);
+                savedTimeframe = apple.load("savedTimeframe");
+
+                if (savedTimeframe) {
+                    if (data.value === savedTimeframe) {
+                        option.selected = true;
+                    }
+                } else {
+                    if (data.selected === true) {
+                        option.selected = true;
+                    }
+                }
+                document.getElementById(id).options.add(option);
+            }
+        },
+        populateProgrammingLanguages: function (id) {
+            var i,
+                data,
+                option,
+                savedProgrammingLanguage;
+            for (i = 0; i < pasteBin.programmingLanguages.length; i++) {
+                data = pasteBin.programmingLanguages[i];
+                option = new Option(data.text, data.value);
+                savedProgrammingLanguage = apple.load("savedProgrammingLanguage");
+
+                if (savedProgrammingLanguage) {
+                    if (data.value === savedProgrammingLanguage) {
+                        option.selected = true;
+                    }
+                } else {
+                    if (data.selected === true) {
+                        option.selected = true;
+                    }
+                }
+
+                if (data.selected === true) {
+                    option.selected = true;
+                }
+                document.getElementById(id).options.add(option);
+            }
         },
         programmingLanguages: [
             {value: "4cs", text: "4CS"},

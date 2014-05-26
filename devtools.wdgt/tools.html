@@ -26,6 +26,8 @@
     <script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleAnimator.js' charset='utf-8'></script>
     <script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleButton.js' charset='utf-8'></script>
     <script type='text/javascript' src='tools.js' charset='utf-8'></script>
+    <script type='text/javascript' src='md5.js' charset='utf-8'></script>
+    <script type='text/javascript' src='sha1.js' charset='utf-8'></script>
 </head>
 <body onload="apple.setup();" bgcolor="#444444">
 <div id="front">
@@ -37,11 +39,12 @@
     <span class="encoding">
         <textarea rows="5" id="dEncodedText" name="dEncodedText" title="dEncodedText" placeholder="INPUT TEXT TO ENCODE/DECODE HERE"></textarea>
         <br/>
-        <input type="button" class="left" value="Base64 Encode" onClick="document.getElementById('dEncodedText').value=btoa(document.getElementById('dEncodedText').value);">
-        <input type="button" class="right" value="Base64 Decode" onClick="document.getElementById('dEncodedText').value=atob(document.getElementById('dEncodedText').value);">
-        <br/>
+        <input type="button" class="left" value="Base64 Encode" onClick="document.getElementById('dEncodedText').value = btoa(document.getElementById('dEncodedText').value);">
+        <input type="button" class="left" value="Base64 Decode" onClick="document.getElementById('dEncodedText').value = atob(document.getElementById('dEncodedText').value);">
         <input type="button" class="left" value="Url Encode" onClick="document.getElementById('dEncodedText').value = encodeURIComponent(document.getElementById('dEncodedText').value);">
-        <input type="button" class="right" value="Url Decode" onClick="document.getElementById('dEncodedText').value = decodeURIComponent(document.getElementById('dEncodedText').value);">
+        <input type="button" class="left" value="Url Decode" onClick="document.getElementById('dEncodedText').value = decodeURIComponent(document.getElementById('dEncodedText').value);">
+        <input type="button" class="left" value="Md5" onClick="document.getElementById('dEncodedText').value = CryptoJS.MD5(document.getElementById('dEncodedText').value);">
+        <input type="button" class="left" value="Sha1" onClick="document.getElementById('dEncodedText').value = CryptoJS.SHA1(document.getElementById('dEncodedText').value);">
         <br/>
     </span>
     <hr/>
@@ -49,29 +52,15 @@
         <textarea rows="5" id="pasteBin-raw" name="pasteBin-raw" title="pasteBin-raw" placeholder="INPUT TEXT TO SEND TO PASTEBIN HERE"></textarea><br/>
         <input type="text" id="pasteBin-filenameTitle" name="pasteBin-filenameTitle" title="pasteBin-filenameTitle" placeholder="Optional: Title">
 
-        <select title="pasteBin-expireTime" id="pasteBin-expireTime">
+        <select title="pasteBin-timeFrame" id="pasteBin-timeFrame">
         </select>
         <script>
-            for (var i = 0; i < pasteBin.timeFrames.length; i++) {
-                var data = pasteBin.timeFrames[i],
-                        option = new Option(data.text, data.value);
-                if (data.selected === true) {
-                    option.selected = true;
-                }
-                document.getElementById("pasteBin-expireTime").options.add(option);
-            }
+            pasteBin.populateTimeframes("pasteBin-timeFrame");
         </script>
         <select title="pasteBin-programmingLanguage" id="pasteBin-programmingLanguage">
         </select>
         <script>
-            for (var i = 0; i < pasteBin.programmingLanguages.length; i++) {
-                var data = pasteBin.programmingLanguages[i],
-                        option = new Option(data.text, data.value);
-                if (data.selected === true) {
-                    option.selected = true;
-                }
-                document.getElementById("pasteBin-programmingLanguage").options.add(option);
-            }
+            pasteBin.populateProgrammingLanguages("pasteBin-programmingLanguage");
         </script>
         <input type="button" value="Post Paste" onClick="pasteBin.execute(
             document.getElementById('pasteBin-raw').value,
@@ -129,8 +118,8 @@
     <div id='infoButton'></div>
 </div>
 <div id="back">
-    <form name="preferences">
-        Password Generation:
+    <span class="password">
+        Password Generation Options:<br/>
         <label for="length">Length:</label>
         <input type="text" id="length" name="length" size=3 value="8" title="Password Length" onchange="apple.save('savedLength',this.value);">
         <br/>
@@ -143,8 +132,24 @@
         <label for="symbols">Use symbols:</label>
         <input type="checkbox" id="symbols" name="symbols" title="Symbols" onclick="apple.save('savedSymbols',this.checked);">
         <br/>
-        <hr/>
-    </form>
+    </span>
+    <hr/>
+    <span class="pasteBin">
+        Pastebin Options:
+        <select title="pasteBin-timeFrame" id="pasteBin-timeFrameB"
+                onchange="apple.save('savedTimeframe',this.value)">
+        </select>
+        <script>
+            pasteBin.populateTimeframes("pasteBin-timeFrameB");
+        </script>
+        <select title="pasteBin-programmingLanguage" id="pasteBin-programmingLanguageB"
+                onchange="apple.save('savedProgrammingLanguage',this.value)">
+        </select>
+        <script>
+            pasteBin.populateProgrammingLanguages("pasteBin-programmingLanguageB");
+        </script>
+    </span>
+
     <div id="doneButton"></div>
 </div>
 </body>
