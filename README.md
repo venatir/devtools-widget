@@ -10,4 +10,4 @@ I have included a
 * pastebin.com - use the settings to set your username and password
 * md5/sha1
 * MongoId
-Also, open to suggestions.  
+* Also, open to suggestions.  
