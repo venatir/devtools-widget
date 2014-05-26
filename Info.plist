@@ -17,7 +17,7 @@
     <key>MainHTML</key>
     <string>tools.html</string>
     <key>Width</key>
-    <integer>500</integer>
+    <integer>560</integer>
     <key>Height</key>
     <integer>500</integer>
     <key>AllowNetworkAccess</key>

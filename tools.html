@@ -1,159 +1,273 @@
 <html>
 <head>
-    <style>
-        @import "tools.css";
-    </style>
-    <script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleInfoButton.js' charset='utf-8'/>
-    <script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleAnimator.js' charset='utf-8'/>
-    <script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleButton.js' charset='utf-8'/>
-    <script type='text/javascript'>
-        var gDoneButton,
-                gInfoButton,
-        //noinspection SpellCheckingInspection
-                keys = "abcdefghijklmnopqrstuvwxyz",
-                symbols = "~`!@#$%^&*()_-+={[}]|\\:;\"'<,>.?/",
-                capitals = "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-                numbers = "0123456789",
-                updateOutput = function (id, result) {
-                    document.getElementById(id).value = result
-                },
-                generate = function () {
-                    var temp = '',
-                            i,
-                            tempKeys,
-                            length,
-                            savedLength,
-                            savedNumbers,
-                            savedCapitals,
-                            savedSymbols;
-                    if (window.widget) {
-                        savedLength = widget.preferenceForKey("savedLength");
-                        savedNumbers = widget.preferenceForKey("savedNumbers");
-                        savedCapitals = widget.preferenceForKey("savedCapitals");
-                        savedSymbols = widget.preferenceForKey("savedSymbols");
+<style>
+    @import "tools.css";
+</style>
+<script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleInfoButton.js' charset='utf-8'></script>
+<script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleAnimator.js' charset='utf-8'></script>
+<script type='text/javascript' src='/System/Library/WidgetResources/AppleClasses/AppleButton.js' charset='utf-8'></script>
+<script type='text/javascript'>
+var gDoneButton,
+        gInfoButton,
+//noinspection SpellCheckingInspection
+        apple = {
+            setup: function () {
+                gDoneButton = new AppleGlassButton(document.getElementById("doneButton"), "Done", this.hidePrefs);
+                gInfoButton = new AppleInfoButton(document.getElementById("infoButton"), document.getElementById("front"), "white", "white", this.showPrefs);
+            },
+            showPrefs: function () {
+                var front = document.getElementById("front");
+                var back = document.getElementById("back");
+
+                if (window.widget) {
+                    widget.prepareForTransition("ToBack");
+                }
+
+                front.style.display = "none";
+                back.style.display = "block";
+
+                if (window.widget) {
+                    setTimeout('widget.performTransition();', 0);
+                }
+            },
+            hidePrefs: function () {
+                var front = document.getElementById("front");
+                var back = document.getElementById("back");
+
+                if (window.widget) {
+                    widget.prepareForTransition("ToFront");
+                }
+
+                back.style.display = "none";
+                front.style.display = "block";
+
+                if (window.widget) {
+                    setTimeout('widget.performTransition();', 0);
+                }
+            },
+            save: function (key, value) {
+                if (window.widget) {
+                    widget.setPreferenceForKey(value, key);
+                }
+            }
+        },
+        password = {
+            keys: "abcdefghijklmnopqrstuvwxyz",
+            symbols: "~`!@#$%^&*()_-+={[}]|\\:;\"'<,>.?/",
+            capitals: "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+            numbers: "0123456789",
+            generate: function () {
+                var temp = '',
+                        i,
+                        tempKeys,
+                        length,
+                        savedLength,
+                        savedNumbers,
+                        savedCapitals,
+                        savedSymbols;
+                if (window.widget) {
+                    savedLength = widget.preferenceForKey("savedLength");
+                    savedNumbers = widget.preferenceForKey("savedNumbers");
+                    savedCapitals = widget.preferenceForKey("savedCapitals");
+                    savedSymbols = widget.preferenceForKey("savedSymbols");
+                }
+
+                tempKeys = this.keys;
+
+                if (savedLength > 0) {
+                    length = savedLength;
+                }
+                else {
+                    length = 8;
+                }
+
+                if (savedCapitals === true) {
+                    tempKeys = tempKeys.concat(this.capitals);
+                }
+
+                if (savedNumbers === true) {
+                    tempKeys = tempKeys.concat(this.numbers);
+                }
+                if (savedSymbols === true) {
+                    tempKeys = tempKeys.concat(this.symbols);
+                }
+
+                for (i = 0; i < length; i++) {
+                    temp += tempKeys.charAt(Math.floor(Math.random() * tempKeys.length))
+                }
+
+                return updateOutput("passwordOutput", temp);
+            }
+        },
+        pasteBin = {
+            execute: function (raw, filenameTitle, expireTime, format) {
+                var api_dev_key = '72da529c1e3107c3dd9c4170d16608c3',// please do not abuse. You can get yours for free by just creating a pastebin.com account
+                        api_paste_code = encodeURIComponent(raw + "\n\n\nI am pasting via https://github.com/venatir/devtools-widget"), // your paste text
+                        api_paste_private = '1', // 0=public 1=unlisted 2=private
+                        api_paste_name = encodeURIComponent(filenameTitle || "I am pasting via https://github.com/venatir/devtools-widget"), // name or title of your paste
+                        api_paste_expire_date = expireTime || '1H',
+                        api_paste_format = format || 'php',
+                        api_user_key = '', // if an invalid api_user_key or no key is used, the paste will be create as a guest
+                        url = 'http://pastebin.com/api/api_post.php',
+                        xmlhttp = new XMLHttpRequest();
+
+                // TODO: comment out my text
+
+                xmlhttp.open("POST", url, true);
+                xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                xmlhttp.onreadystatechange = function () {
+                    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                        document.getElementById("raw").value = xmlhttp.responseText;
                     }
-
-                    tempKeys = keys;
-
-                    if (savedLength > 0) {
-                        length = savedLength;
-                    }
-                    else {
-                        length = 8;
-                    }
-
-                    if (savedCapitals === true) {
-                        tempKeys = tempKeys.concat(capitals);
-                    }
-
-                    if (savedNumbers === true) {
-                        tempKeys = tempKeys.concat(numbers);
-                    }
-                    if (savedSymbols === true) {
-                        tempKeys = tempKeys.concat(symbols);
-                    }
-
-                    for (i = 0; i < length; i++) {
-                        temp += tempKeys.charAt(Math.floor(Math.random() * tempKeys.length))
-                    }
-
-                    return updateOutput(passwordOutput, temp);
-                },
-                setup = function () {
-                    gDoneButton = new AppleGlassButton(document.getElementById("doneButton"), "Done", hidePrefs);
-                    gInfoButton = new AppleInfoButton(document.getElementById("infoButton"), document.getElementById("front"), "white", "white", showPrefs);
-                },
-                showPrefs = function () {
-                    var front = document.getElementById("front");
-                    var back = document.getElementById("back");
-
-                    if (window.widget) {
-                        widget.prepareForTransition("ToBack");
-                    }
-
-                    front.style.display = "none";
-                    back.style.display = "block";
-
-                    if (window.widget) {
-                        setTimeout('widget.performTransition();', 0);
-                    }
-                },
-                hidePrefs = function () {
-                    var front = document.getElementById("front");
-                    var back = document.getElementById("back");
-
-                    if (window.widget) {
-                        widget.prepareForTransition("ToFront");
-                    }
-
-                    back.style.display = "none";
-                    front.style.display = "block";
-
-                    if (window.widget) {
-                        setTimeout('widget.performTransition();', 0);
-                    }
-                },
-                save = function (key, value) {
-                    if (window.widget) {
-                        widget.setPreferenceForKey(value, key);
-                    }
-                },
-                pasteBin = function (raw, filenameTitle, expireTime, format) {
-                    var api_dev_key = '72da529c1e3107c3dd9c4170d16608c3',// please do not abuse. You can get yours for free by just creating a pastebin.com account
-                            api_paste_code = encodeURIComponent(raw + "\n\n\nI am pasting via https://github.com/venatir/devtools-widget"), // your paste text
-                            api_paste_private = '1', // 0=public 1=unlisted 2=private
-                            api_paste_name = encodeURIComponent(filenameTitle || "I am pasting via https://github.com/venatir/devtools-widget"), // name or title of your paste
-                            api_paste_expire_date = expireTime || '1H',
-                            api_paste_format = format || 'php',
-                            api_user_key = '', // if an invalid api_user_key or no key is used, the paste will be create as a guest
-                            url = 'http://pastebin.com/api/api_post.php',
-                            xmlhttp = new XMLHttpRequest();
-
-                    xmlhttp.open("POST", url, true);
-                    xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                    xmlhttp.onreadystatechange = function () {
-                        alert("1");
-                        alert(xmlhttp.readyState);
-                        alert(xmlhttp.responseText);
-                        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                            alert("2");
-                            document.getElementById("raw").value = xmlhttp.responseText;
-                            alert("3");
-                        }
-                    };
-                    xmlhttp.send(
-                            "api_option=paste&" +
-                            "api_dev_key=" + api_dev_key + "&" +
-                            "api_dev_key=" + api_dev_key + "&" +
-                            "api_paste_code=" + api_paste_code + "&" +
-                            "api_paste_private=" + api_paste_private + "&" +
-                            "api_paste_name=" + api_paste_name + "&" +
-                            "api_paste_expire_date=" + api_paste_expire_date + "&" +
-                            "api_paste_format=" + api_paste_format + "&" +
-                            "api_user_key=" + api_user_key
-                    );
                 };
-    </script>
+                xmlhttp.send(
+                        "api_option=paste&" +
+                        "api_dev_key=" + api_dev_key + "&" +
+                        "api_dev_key=" + api_dev_key + "&" +
+                        "api_paste_code=" + api_paste_code + "&" +
+                        "api_paste_private=" + api_paste_private + "&" +
+                        "api_paste_name=" + api_paste_name + "&" +
+                        "api_paste_expire_date=" + api_paste_expire_date + "&" +
+                        "api_paste_format=" + api_paste_format + "&" +
+                        "api_user_key=" + api_user_key
+                )
+            }
+        },
+        time = {
+            intervalHandle: 0,
+            updateTimestamp: function () {
+                var timestamp = new Date().getTime();
+                if (document.activeElement.id !== "timestamp") {
+                    updateOutput("timestamp", (timestamp / 1000 | 0).toString());
+                }
+                if (!this.intervalHandle) {
+                    time.intervalHandle = setInterval(this.updateTimestamp, 1000);
+                }
+            },
+            pauseTimestamp: function () {
+                if (this.intervalHandle) {
+                    clearInterval(this.intervalHandle);
+                    this.intervalHandle = 0;
+                }
+            },
+            getNiceTimestampConversion: function (input) {
+                var epoch,
+                        result = "",
+                        timestampType;
+                if (input.charAt(input.length - 1) == "L") {
+                    input = input.slice(0, -1);
+                }
+                input *= 1;
+                epoch = input;
+
+                //determine timestampType
+                timestampType = document.getElementById("timestampType").value;
+                switch (timestampType) {
+                    case "A":
+                        if (epoch >= 100000000000) {
+                            epoch = (epoch / 1e3 | 0);
+                        }
+                        if (epoch >= 100000000000) {
+                            epoch = (epoch / 1e3 | 0);
+                        }
+                        break;
+                    case "MILLI":
+                        epoch = (epoch / 1e3 | 0);
+                        break;
+                    case "MICRO":
+                        epoch = (epoch / 1e6 | 0);
+                        break;
+                    case "SEC":
+                    default:
+                        //do nothing
+                        break;
+                }
+                result = this.getHumanFormatForSeconds(epoch);
+                return result;
+            },
+            getHumanFormatForSeconds: function (input) {
+                var date = new Date(input * 1000),
+                        localTime,
+                        gmtTime,
+                        result = input + "\n";
+                if (Object.prototype.toString.call(date) !== "[object Date]" || date.toString() === "Invalid Date") {
+                    result = "Cannot parse date";
+                } else {
+                    localTime = date.getFullYear() + "-" +
+                    ("0" + date.getMonth() + 1).slice(-2) + "-" +
+                    ("0" + date.getDate()).slice(-2) + " " +
+                    ("0" + date.getHours()).slice(-2) + ":" +
+                    ("0" + date.getMinutes()).slice(-2) + ":" +
+                    ("0" + date.getSeconds()).slice(-2) + " GMT" + ((-date.getTimezoneOffset() > 0) ? "+" : "-") + (-date.getTimezoneOffset() / 60).toString();
+                    gmtTime = date.getUTCFullYear() + "-" +
+                    ("0" + date.getUTCMonth() + 1).slice(-2) + "-" +
+                    ("0" + date.getUTCDate()).slice(-2) + " " +
+                    ("0" + date.getUTCHours()).slice(-2) + ":" +
+                    ("0" + date.getUTCMinutes()).slice(-2) + ":" +
+                    ("0" + date.getUTCSeconds()).slice(-2) + " GMT";
+
+                    result += gmtTime;
+                    if (date.getTimezoneOffset() !== 0) {
+                        result += "\n" + localTime;
+                    }
+                }
+                return result;
+            },
+            updateDate: function () {
+                var date = new Date();
+                updateOutput("date-yyyy", date.getUTCFullYear());
+                updateOutput("date-mm", ("0" + date.getUTCMonth()).slice(-2));
+                updateOutput("date-dd", ("0" + date.getUTCDate()).slice(-2));
+                updateOutput("date-hh", ("0" + date.getUTCHours()).slice(-2));
+                updateOutput("date-ii", ("0" + date.getUTCMinutes()).slice(-2));
+                updateOutput("date-ss", ("0" + date.getUTCSeconds()).slice(-2));
+            },
+            convertHumanToEpoch: function () {
+                var tz = document.getElementById("date-tz").value,
+                        d,
+                        yyyy = document.getElementById("date-yyyy").value,
+                        mm = document.getElementById("date-mm").value,
+                        dd = document.getElementById("date-dd").value,
+                        hh = document.getElementById("date-hh").value,
+                        ii = document.getElementById("date-ii").value,
+                        ss = document.getElementById("date-ss").value,
+                        epoch;
+                if (tz == 2) {
+                    d = new Date(yyyy, mm - 1, dd, hh, ii, ss);
+                } else {
+                    d = new Date(Date.UTC(yyyy, mm - 1, dd, hh, ii, ss));
+                }
+                epoch = (d.getTime() / 1000);
+                updateOutput("timestampResult", epoch)
+            }
+        },
+        updateOutput = function (id, result) {
+            if (document.getElementById(id).value !== undefined) {
+                document.getElementById(id).value = result;
+            }
+            else {
+                document.getElementById(id).innerHTML = result;
+            }
+        };
+</script>
 </head>
-<body onload="setup();" bgcolor=#444444>
+<body onload="apple.setup();">
 <div id="front">
 <span class="tools">
-        <form name="passwordGenerator">
         <input type="text" size=18 id="passwordOutput" name="passwordOutput" title="Password">
-        <input type="button" value="Generate Password" onClick="generate();">
+        <input type="button" value="Generate Password" onClick="password.generate();">
         <hr/>
-        <textarea rows="5" id="dEncodedText" name="dEncodedText" title="dEncodedText"></textarea>
+        <textarea rows="5" id="dEncodedText" name="dEncodedText" title="dEncodedText" placeholder="INPUT TEXT TO ENCODE/DECODE HERE"></textarea>
         <br/>
         <input type="button" class="left" value="Base64 Encode" onClick="document.getElementById('dEncodedText').value=btoa(document.getElementById('dEncodedText').value);">
         <input type="button" class="right" value="Base64 Decode" onClick="document.getElementById('dEncodedText').value=atob(document.getElementById('dEncodedText').value);">
         <br/>
-        <br/>
-        <input type="button" class="left" value="Url Encode" onClick="document.getElementById('dEncodedText').value=encodeURIComponent(document.getElementById('dEncodedText').value);">
-        <input type="button" class="right" value="Url Decode" onClick="document.getElementById('dEncodedText').value=decodeURIComponent(document.getElementById('dEncodedText').value);">
+        <input type="button" class="left" value="Url Encode" onClick="document.getElementById('dEncodedText').value = encodeURIComponent(document.getElementById('dEncodedText').value);">
+        <input type="button" class="right" value="Url Decode" onClick="document.getElementById('dEncodedText').value = decodeURIComponent(document.getElementById('dEncodedText').value);">
         <br/>
         <hr/>
-        <textarea rows="5" id="raw" name="raw" title="raw"></textarea><br/>
-        <input type="text" id="filenameTitle" name="filenameTitle" title="filenameTitle">
+        <textarea rows="5" id="raw" name="raw" title="raw" placeholder="INPUT TEXT TO SEND TO PASTEBIN HERE"></textarea><br/>
+        <input type="text" id="filenameTitle" name="filenameTitle" title="filenameTitle" placeholder="Optional: Title">
 
         <select title="expireTime" id="expireTime">
             <option value="N">Never</option>
@@ -386,13 +500,56 @@
         <option value="z80">Z80 Assembler</option>
         <option value="zxbasic">ZXBasic</option>
         </select>
-        <br/>
         <input type="button" value="Post Paste" onClick="pasteBin(
         document.getElementById('raw').value,
         document.getElementById('filenameTitle').value,
         document.getElementById('expireTime').value,
         document.getElementById('format').value);">
-        </form>
+        <hr/>
+        <input class="left" type="text" size=15 id="timestamp" name="timestamp" title="timestamp"
+               onblur="updateOutput('timestampResult',time.getNiceTimestampConversion(this.value));time.updateTimestamp()"
+               onmouseover="time.pauseTimestamp();"
+               onclick="this.select();time.pauseTimestamp();"
+               onmouseout="time.updateTimestamp();">
+        <select id="timestampType">
+            <option value="A" selected>Autodetect</option>
+            <option value="SEC">Seconds</option>
+            <option value="MILLI">Milliseconds</option>
+            <option value="MICRO">Microseconds</option>
+        </select>
+        <script>time.updateTimestamp();</script>
+        <textarea rows="3" id="timestampResult" placeholder="INPUT TIMESTAMP ABOVE AND SELECT WHAT THE ENTERED VALUE REPRESENTS"></textarea>
+
+        <table>
+            <tr>
+                <td>Day</td>
+                <td>Month</td>
+                <td>Year</td>
+                <td>&nbsp;</td>
+                <td>Hour</td>
+                <td>Min</td>
+                <td colspan="2">Sec</td>
+            </tr>
+            <tr>
+                <td><input type="text" id="date-dd" size="2" maxlength="2" value="1" name="dd">&nbsp;-&nbsp;</td>
+                <td><input type="text" id="date-mm" size="2" maxlength="2" value="1" name="mm">&nbsp;-&nbsp;</td>
+                <td><input type="text" id="date-yyyy" size="5" maxlength="4" value="2012" name="yyyy"></td>
+                <td>&nbsp;</td>
+                <td><input type="text" id="date-hh" size="2" maxlength="2" value="0" name="hh">&nbsp;:&nbsp;</td>
+                <td><input type="text" id="date-ii" size="2" maxlength="2" value="0" name="ii">&nbsp;:&nbsp;</td>
+                <td>
+                    <input type="text" id="date-ss" size="2" maxlength="2" value="0" name="ss">
+                    <select id="date-tz" name="tz">
+                        <option value="1" selected>GMT</option>
+                        <option value="2">Local time</option>
+                    </select>
+                </td>
+                <td><input type="submit" class="button" title="Convert to timestamp" value="Convert to timestamp" onclick="time.convertHumanToEpoch()"></td>
+            </tr>
+        </table>
+<script>time.updateDate();</script>
+
+
     </span>
 
 <div id='infoButton'></div>
@@ -401,18 +558,19 @@
     <form name="preferences">
         Password Generation:
         <label for="length">Length:</label>
-        <input type="text" id="length" name="length" size=3 value="8" title="Password Length" onchange="save('savedLength',this.value);">
+        <input type="text" id="length" name="length" size=3 value="8" title="Password Length" onchange="apple.save('savedLength',this.value);">
         <br/>
         <label for="numbers">Use numbers:</label>
-        <input type="checkbox" id="numbers" name="numbers" title="Numbers" onclick="save('savedNumbers',this.checked);">
+        <input type="checkbox" id="numbers" name="numbers" title="Numbers" onclick="apple.save('savedNumbers',this.checked);">
         <br/>
         <label for="capitals">Use capitals:</label>
-        <input type="checkbox" id="capitals" name="capitals" title="Capitals" onclick="save('savedCapitals',this.checked);">
+        <input type="checkbox" id="capitals" name="capitals" title="Capitals" onclick="apple.save('savedCapitals',this.checked);">
         <br/>
         <label for="symbols">Use symbols:</label>
-        <input type="checkbox" id="symbols" name="symbols" title="Symbols" onclick="save('savedSymbols',this.checked);">
+        <input type="checkbox" id="symbols" name="symbols" title="Symbols" onclick="apple.save('savedSymbols',this.checked);">
         <br/>
         <hr/>
+        <!-- TODO: add username and password for pastebin-->
     </form>
     <div id="doneButton"></div>
 </div>
