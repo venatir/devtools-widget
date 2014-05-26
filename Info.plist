@@ -17,8 +17,10 @@
     <key>MainHTML</key>
     <string>tools.html</string>
     <key>Width</key>
-    <integer>320</integer>
+    <integer>500</integer>
     <key>Height</key>
-    <integer>240</integer>
+    <integer>500</integer>
+    <key>AllowNetworkAccess</key>
+    <true/>
 </dict>
 </plist>
