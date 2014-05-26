@@ -25,7 +25,6 @@ var gDoneButton,
         hidePrefs: function () {
 
             var front = document.getElementById("front");
-
             var back = document.getElementById("back");
             if (window.widget) {
                 widget.prepareForTransition("ToFront");
@@ -95,17 +94,17 @@ var gDoneButton,
         }
     },
     pasteBin = {
+        api_dev_key: '72da529c1e3107c3dd9c4170d16608c3',// please do not abuse. You can get yours for free by just creating a pastebin.com account
         execute: function (raw, filenameTitle, expireTime, format) {
             if (raw.length === 0) {
                 return;
             }
-            var api_dev_key = '72da529c1e3107c3dd9c4170d16608c3',// please do not abuse. You can get yours for free by just creating a pastebin.com account
-                api_paste_code = encodeURIComponent(raw + "\n\n\nI am pasting via https://github.com/venatir/devtools-widget"), // your paste text
+            var api_paste_code = encodeURIComponent(raw + "\n\n\nI am pasting via https://github.com/venatir/devtools-widget"), // your paste text
                 api_paste_private = '1', // 0=public 1=unlisted 2=private
                 api_paste_name = encodeURIComponent(filenameTitle || "I am pasting via https://github.com/venatir/devtools-widget"), // name or title of your paste
                 api_paste_expire_date = expireTime || '1H',
                 api_paste_format = format || 'php',
-                api_user_key = '', // if an invalid api_user_key or no key is used, the paste will be create as a guest
+                api_user_key = apple.load("savedPasteBin-userKey"), // if an invalid api_user_key or no key is used, the paste will be create as a guest
                 url = 'http://pastebin.com/api/api_post.php',
                 xmlhttp = new XMLHttpRequest();
 
@@ -115,27 +114,30 @@ var gDoneButton,
             xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             xmlhttp.onreadystatechange = function () {
                 if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-                    document.getElementById("raw").value = xmlhttp.responseText;
+                    updateOutput("pasteBin-raw", xmlhttp.responseText);
                 }
             };
             xmlhttp.send(
                 "api_option=paste&" +
-                "api_dev_key=" + api_dev_key + "&" +
-                "api_dev_key=" + api_dev_key + "&" +
+                "api_dev_key=" + this.api_dev_key + "&" +
                 "api_paste_code=" + api_paste_code + "&" +
                 "api_paste_private=" + api_paste_private + "&" +
                 "api_paste_name=" + api_paste_name + "&" +
                 "api_paste_expire_date=" + api_paste_expire_date + "&" +
                 "api_paste_format=" + api_paste_format + "&" +
                 "api_user_key=" + api_user_key
-            )
+            );
         },
         populateTimeframes: function (id) {
             var i,
                 data,
                 option,
-                savedTimeframe;
-            document.getElementById(id).options.lenght = 0;
+                savedTimeframe,
+                select = document.getElementById(id);
+
+            while (select.length > 0) {
+                select.remove(select.length - 1);
+            }
             for (i = 0; i < pasteBin.timeFrames.length; i++) {
                 data = pasteBin.timeFrames[i];
                 option = new Option(data.text, data.value);
@@ -157,7 +159,12 @@ var gDoneButton,
             var i,
                 data,
                 option,
-                savedProgrammingLanguage;
+                savedProgrammingLanguage,
+                select = document.getElementById(id);
+
+            while (select.length > 0) {
+                select.remove(select.length - 1);
+            }
             for (i = 0; i < pasteBin.programmingLanguages.length; i++) {
                 data = pasteBin.programmingLanguages[i];
                 option = new Option(data.text, data.value);
@@ -178,6 +185,23 @@ var gDoneButton,
                 }
                 document.getElementById(id).options.add(option);
             }
+        },
+        getUserKey: function (callback) {
+            var xmlhttp = new XMLHttpRequest();
+
+            xmlhttp.open("POST", "http://pastebin.com/api/api_login.php", true);
+            xmlhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xmlhttp.onreadystatechange = function () {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                    apple.save("savedPasteBin-userKey", xmlhttp.responseText);
+                    callback(xmlhttp.responseText);
+                }
+            };
+            xmlhttp.send(
+                "api_dev_key=" + this.api_dev_key + "&" +
+                "api_user_name=" + document.getElementById("pasteBin-username").value + "&" +
+                "api_user_password=" + document.getElementById("pasteBin-password").value
+            );
         },
         programmingLanguages: [
             {value: "4cs", text: "4CS"},
@@ -460,6 +484,8 @@ var gDoneButton,
                     break;
             }
             result = this.getHumanFormatForSeconds(epoch);
+            //add MongoId
+            result += "\nObjectId(\"" + epoch.toString(16) + "0000000000000000\")";
             return result;
         },
         getHumanFormatForSeconds: function (input) {

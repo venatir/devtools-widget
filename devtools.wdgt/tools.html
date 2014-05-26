@@ -65,7 +65,7 @@
         <input type="button" value="Post Paste" onClick="pasteBin.execute(
             document.getElementById('pasteBin-raw').value,
             document.getElementById('pasteBin-filenameTitle').value,
-            document.getElementById('pasteBin-expireTime').value,
+            document.getElementById('pasteBin-timeFrame').value,
             document.getElementById('pasteBin-programmingLanguage').value);">
     </span>
     <hr/>
@@ -83,7 +83,7 @@
             <option value="MICRO">Microseconds</option>
         </select>
         <script>time.updateTimestamp();</script>
-        <textarea rows="3" id="timestampResult" placeholder="INPUT TIMESTAMP ABOVE AND SELECT WHAT THE ENTERED VALUE REPRESENTS"></textarea>
+        <textarea rows="4" id="timestampResult" placeholder="INPUT TIMESTAMP ABOVE AND SELECT WHAT THE ENTERED VALUE REPRESENTS"></textarea>
         <table>
             <tr>
                 <td>Day</td>
@@ -148,6 +148,19 @@
         <script>
             pasteBin.populateProgrammingLanguages("pasteBin-programmingLanguageB");
         </script>
+        <br/>
+        <input type="text" id="pasteBin-username" name="pasteBin-username" title="pasteBin-username" placeholder="Username">
+        <input type="text" id="pasteBin-password" name="pasteBin-password" title="pasteBin-password" placeholder="Password">
+        <input type="button" value="Update My User Code"
+               onClick="
+               if (apple.load('savedPasteBin-userKeypasteBin')){
+                    updateOutput('pasteBin-userkey',apple.load('savedPasteBin-userKeypasteBin'));
+               }else{
+                    pasteBin.getUserKey(function(p){updateOutput('pasteBin-userkey',p)});
+               }">
+        <br/>
+        Your usercode is: <div id="pasteBin-userkey"></div>
+        <br/>
     </span>
 
     <div id="doneButton"></div>
