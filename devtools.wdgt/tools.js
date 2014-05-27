@@ -115,6 +115,8 @@ var gDoneButton,
             xmlhttp.onreadystatechange = function () {
                 if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
                     updateOutput("pasteBin-raw", xmlhttp.responseText);
+                    pasteBin.populateTimeframes("pasteBin-timeFrame");
+                    pasteBin.populateProgrammingLanguages("pasteBin-programmingLanguage");
                 }
             };
             xmlhttp.send(
